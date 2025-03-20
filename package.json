@@ -5,7 +5,8 @@
   "description": "A package to fetch Medium user profiles and blogs",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js",
+    "build": "echo 'No build step required' && exit 0"
   },
   "keywords": [
     "medium",
