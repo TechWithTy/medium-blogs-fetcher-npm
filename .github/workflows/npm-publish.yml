@@ -2,15 +2,15 @@ name: Publish to NPM
 
 on:
   release:
-    types: [created]  # Runs when a new GitHub release is created
+    types: [created] # Runs when a GitHub Release is created
   push:
     branches:
-      - main  # Runs on push to the main branch
-  workflow_dispatch:  # Allows manual trigger from GitHub Actions UI
+      - main # Runs on push to main branch
+  workflow_dispatch: # Allows manual trigger
 
 permissions:
-  contents: read
-  packages: write  # Required for publishing to NPM
+  contents: write # Required for committing version updates
+  packages: write # Required for publishing to NPM
 
 jobs:
   deploy:
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensures all history is available
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -29,11 +31,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build package
-        run: npm run build
+      - name: Bump version automatically
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          npm version patch -m "CI: Bump version to %s [skip ci]"
+          git push origin main --tags
 
       - name: Publish to NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
-        continue-on-error: false  # Stop workflow if publish fails
+        continue-on-error: false # Stop workflow if publish fails
