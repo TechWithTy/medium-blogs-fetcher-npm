@@ -30,6 +30,30 @@ export async function getMediumUserProfile(username) {
   }
 }
 
+
+/**
+ * Fetch the Medium user's avatar by scraping their profile page.
+ * @param {string} username - Medium username (without '@')
+ * @returns {Promise<string>} - URL of the user's profile avatar or a default avatar.
+ */
+export async function getMediumAvatar(username) {
+  const profileUrl = `https://medium.com/@${username}`;
+
+  try {
+      const { data } = await axios.get(profileUrl, {
+          headers: { "User-Agent": "Mozilla/5.0" }
+      });
+
+      const $ = cheerio.load(data);
+      const ogImage = $('meta[property="og:image"]').attr("content");
+
+      return ogImage || "https://cdn-images-1.medium.com/fit/c/64/64/1*2Y7paYtPz5-Nj0zTLOzSwg.png";
+  } catch (error) {
+      console.error(`Error fetching avatar: ${error.message}`);
+      return "https://cdn-images-1.medium.com/fit/c/64/64/1*2Y7paYtPz5-Nj0zTLOzSwg.png"; // Default avatar
+  }
+}
+
 /**
  * Fetch Medium blogs for a given username.
  * @param {string} username - Medium username
