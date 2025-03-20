@@ -1,0 +1,25 @@
+{
+  "name": "medium-blogs-fetcher",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A package to fetch Medium user profiles and blogs",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "medium",
+    "scraper",
+    "blogs"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.10",
+    "rss-parser": "^3.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10"
+  }
+}
