@@ -9,20 +9,20 @@ import {
   const tag = "technology"; // Change to any Medium tag you want to test
   const limit = 5; // Set the limit to the desired number of top users
 
-    console.log("🔹 Fetching Medium profile & blogs without options...");
+  //   console.log("🔹 Fetching Medium profile & blogs without options...");
 
-    // Fetch without options (default request)
-    const profileDefault = await getMediumUserProfile("codingoni");
-    console.log("🔹 Default Profile:", profileDefault);
+  //   // Fetch without options (default request)
+    // const profileDefault = await getMediumUserProfile("startswithabang");
+    // console.log("🔹 Default Profile:", profileDefault);
 
     const blogsDefault = await getMediumBlogs("codingoni");
-    console.log("🔹 Default Blogs:", blogsDefault);
+    // console.log("🔹 Default Blogs:", blogsDefault);
 
-    console.log("\n🔹 Fetching with custom headers & proxy...");
+  //   console.log("\n🔹 Fetching with custom headers & proxy...");
   const usersWithoutOptions = await getTopUsersByTag(tag, limit);
   console.log("🔹 Top Users (Limited):", usersWithoutOptions);
 
-  // Options with custom headers & proxy
+//   // Options with custom headers & proxy
   const options = {
     headers: {
       "User-Agent": "Mozilla/5.0",

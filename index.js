@@ -20,14 +20,42 @@ export async function getMediumUserProfile(username, options = {}) {
     });
 
     const $ = cheerio.load(data);
+
     const avatar =
       $('meta[property="og:image"]').attr("content") ||
       "https://cdn-images-1.medium.com/fit/c/64/64/default-avatar.png";
+
     const bio =
       $('meta[property="og:description"]').attr("content") ||
       "No bio available.";
 
-    return { username, avatar, bio, profileUrl };
+    // Extract followers count from the correct element
+    let followersText = $('span.pw-follower-count a').first().text().trim();
+    
+    // Ensure the followers text is properly extracted
+    if (!followersText) {
+      console.warn(`⚠️ No followers found for ${username}`);
+      followersText = "0";
+    }
+
+    // Convert K (thousand) and M (million) properly
+    let followers = 0;
+    const match = followersText.match(/^([\d.]+)([KM]?)\s*Followers?$/i); // Match number + optional K/M
+
+    if (match) {
+      let number = parseFloat(match[1]); // Extract numeric part
+      let suffix = match[2].toUpperCase(); // Extract K or M (if present)
+
+      if (suffix === "M") {
+        followers = Math.round(number * 1_000_000);
+      } else if (suffix === "K") {
+        followers = Math.round(number * 1_000);
+      } else {
+        followers = Math.round(number);
+      }
+    }
+
+    return { username, avatar, bio, followers, profileUrl };
   } catch (error) {
     return {
       error: "User not found or request failed",
@@ -35,6 +63,8 @@ export async function getMediumUserProfile(username, options = {}) {
     };
   }
 }
+
+
 
 /**
  * Fetch the Medium user's avatar by scraping their profile page.
@@ -91,12 +121,14 @@ export async function getMediumBlogs(username, options = {}) {
     return { error: "Failed to fetch Medium blogs", details: error.message };
   }
 }
+
+
 /**
  * Fetch top Medium users for a specific blog tag, sorted by followers.
  * @param {string} tag - Medium tag (e.g., "technology", "programming").
  * @param {number} limit - Number of top users to return.
  * @param {object} options - (Optional) Custom headers & proxy.
- * @returns {Promise<object[]>} - Sorted list of top users with profiles.
+ * @returns {Promise<object[]>} - Sorted list of top users with profiles and follower count.
  */
 export async function getTopUsersByTag(tag, limit, options = {}) {
   try {
@@ -137,7 +169,13 @@ export async function getTopUsersByTag(tag, limit, options = {}) {
           return null; // Skip failed users
         }
 
-        return profile; // Profile already contains followers count
+        return {
+          username: profile.username,
+          avatar: profile.avatar,
+          bio: profile.bio,
+          followers: profile.followers, // Ensure followers are included
+          profileUrl: profile.profileUrl,
+        };
       })
     );
 
@@ -146,6 +184,11 @@ export async function getTopUsersByTag(tag, limit, options = {}) {
       .filter((user) => user !== null) // Remove failed fetch attempts
       .sort((a, b) => b.followers - a.followers) // Sort by followers count
       .slice(0, limit); // Limit results
+
+    console.log(`✅ Top ${limit} users sorted by followers:`); // Logging results
+    sortedUsers.forEach((user, index) =>
+      console.log(`#${index + 1}: ${user.username} - ${user.followers} Followers`)
+    );
 
     return sortedUsers;
   } catch (error) {
